@@ -12,12 +12,19 @@ import AWSPredictionsPlugin
 import Amplify
 import SwiftUI
 
+public class FinalImageViewModel: ObservableObject {
+  // @Published public var capturedImages: [UIImage] = []
+  @Published public var capturedImage: UIImage?
+
+  public init() {}
+}
+
 import protocol AWSPluginsCore.AWSCredentialsProvider
 
 public struct FaceLivenessDetectorView: View {
   @StateObject var viewModel: FaceLivenessDetectionViewModel
   @Binding var isPresented: Bool
-  @Binding var capturedImage: UIImage?
+  @ObservedObject var finalImageViewModel: FinalImageViewModel
   @State var displayState: DisplayState = .awaitingCameraPermission
   @State var displayingCameraPermissionsNeededAlert = false
 
@@ -32,15 +39,13 @@ public struct FaceLivenessDetectorView: View {
     region: String,
     disableStartView: Bool = false,
     isPresented: Binding<Bool>,
-    capturedImage: Binding<UIImage?>,
+    finalImageViewModel: finalImageViewModel,
     onCompletion: @escaping (Result<Void, FaceLivenessDetectionError>) -> Void
   ) {
     self.disableStartView = disableStartView
     self._isPresented = isPresented
-    self._capturedImage = capturedImage
+    self.finalImageViewModel = finalImageViewModel
     self.onCompletion = onCompletion
-
-    let capturedImageBinding = capturedImage
 
     let videoChunker = VideoChunker(
       assetWriter: LivenessAVAssetWriter(),
@@ -48,7 +53,7 @@ public struct FaceLivenessDetectorView: View {
       assetWriterInput: LivenessAVAssetWriterInput(),
       onSingleFrameCaptured: { image in
         DispatchQueue.main.async {
-          capturedImageBinding.wrappedValue = image
+          finalImageViewModel.capturedImage = image
         }
       }
     )
@@ -101,13 +106,13 @@ public struct FaceLivenessDetectorView: View {
     region: String,
     disableStartView: Bool = false,
     isPresented: Binding<Bool>,
-    capturedImage: Binding<UIImage?>,
+    finalImageViewModel: finalImageViewModel,
     onCompletion: @escaping (Result<Void, FaceLivenessDetectionError>) -> Void,
     captureSession: LivenessCaptureSession
   ) {
     self.disableStartView = disableStartView
     self._isPresented = isPresented
-    self._capturedImage = capturedImage
+    self.finalImageViewModel = finalImageViewModel
     self.onCompletion = onCompletion
 
     self.sessionTask = Task {
