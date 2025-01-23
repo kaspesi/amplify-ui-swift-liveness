@@ -17,11 +17,13 @@ final class VideoChunker {
     let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
     var startTimeSeconds: Double?
     var provideSingleFrame: ((UIImage) -> Void)?
+    var onSingleFrameCaptured: ((UIImage) -> Void)?
 
     init(
         assetWriter: AVAssetWriter,
         assetWriterDelegate: AssetWriterDelegate,
-        assetWriterInput: AVAssetWriterInput
+        assetWriterInput: AVAssetWriterInput,
+        onSingleFrameCaptured: ((UIImage) -> Void)? = nil
     ) {
         self.assetWriter = assetWriter
         self.assetWriterDelegate = assetWriterDelegate
@@ -30,6 +32,7 @@ final class VideoChunker {
         self.assetWriterInput.expectsMediaDataInRealTime = true
         self.assetWriter.delegate = assetWriterDelegate
         self.assetWriter.add(assetWriterInput)
+        self.onSingleFrameCaptured = onSingleFrameCaptured
     }
 
     func start() {
@@ -37,6 +40,11 @@ final class VideoChunker {
         assetWriter.startWriting()
         assetWriter.startSession(atSourceTime: .zero)
         state = .writing
+
+        // Capture a single frame when the session starts
+        if let singleFrame = captureSingleFrame() {
+            onSingleFrameCaptured?(singleFrame)
+        }
     }
 
     func finish(singleFrame: @escaping (UIImage) -> Void) {
@@ -79,5 +87,12 @@ final class VideoChunker {
         let ciImage = CIImage(cvPixelBuffer: buffer)
         let uiImage = UIImage(ciImage: ciImage)
         return uiImage
+    }
+
+    // Assuming there's a method to capture a single frame
+    func captureSingleFrame() -> UIImage? {
+        // Logic to capture a single frame
+        // Return the captured frame
+        return nil
     }
 }
