@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-public class LivenessCaptureSession {
+class LivenessCaptureSession {
     let captureDevice: LivenessCaptureDevice
     private let captureQueue = DispatchQueue(label: "com.amazonaws.faceliveness.cameracapturequeue")
     private let configurationQueue = DispatchQueue(label: "com.amazonaws.faceliveness.sessionconfiguration", qos: .userInteractive)
